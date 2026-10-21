@@ -79,10 +79,44 @@
                     </div>
                 </div>
 
-                <div class="flex item-baseline gap-3"
+                <div class="flex item-baseline gap-3 mb-6">
+                    <span class="text-3xl font-extrabold tracking-tight" id="chartPrice">$232.40</span>
+                    <span class="text-sm font-semibold px-2.5  py-1 rounded-lg" id="chartChange">+1.25%</span>
+                </div>
+
+                <div  class="h-72 relative w-full">
+                    <canvas id="stockChart"></canvas>
+                </div>
             </div>
         </div>
+
+        <div class="space-y-6">
+
+            <div class="bg-stone-900 border border-stone-800 rounded-2xl p-6  shadow-xl">
+                <h4 class="text-sm font-semibold text-stone-400 uppercase tracking-wider mb-4">Key Financial Metrics</h4>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-stone-950/60 p-3.5 rounded-xl border border-stone-800/50">
+                        <span class="text-xs text-stone-500 block">Market Cap</span>
+                        <span class="text-base font-bold text-stone-200" id="mcapVal">$3.52 T</span>
+                    </div>
+                    <div class="bg-stone-950/60 p-3.5 rounded-xl border boder-stone-800/50">
+                        <span class="text-xs text-stone-500 block">P/E Ratio</span>
+                        <span class="text-base font-bold text-stone-200" id="peVal">$33.4</span>
+                    </div>
+                    <div class="bg-stone-950/60 p-3.5 rounded-xl border border-stone-800/50">
+                        <span class="text-xs text-stone-500 block">52-Wk High</span>
+                        <span class="text-base font-bold text-stone-200" id="highVal">$234.23</span>
+                    </div>
+                    <div class="bg-stone-950/60 p-3.5 rounded-xl border border-stone-800/50">
+                        <span class="text-xs text-stone-500 block">52-Wk Low</span>
+                        <span class="text-base font-bold  text-stone-200" id="lowVal">$164.08</span>
+                    </div>
+                </div>
+            </div>
+
+    </div>        
     </div>
+        </div>
     </header>
 
 
