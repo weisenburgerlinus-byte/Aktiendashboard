@@ -281,7 +281,7 @@ function renderChart() {
         stockChart.destroy();
     }
 
-    const lineColor = selectedStock.positive ? "#34d399" : "#f87171";
+    const lineColor = selectedStock.positive ? "#1ab179" : "#b12222";
     const fillColor = selectedStock.positive
         ? "rgba(52, 211, 153, 0.12)"
         : "rgba(248, 113, 113, 0.12)";
@@ -379,4 +379,9 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initDashboard);
 } else {
     initDashboard();
+}
+
+function openComparison() {
+    localStorage.setItem("stocksForComparison", JSON.stringify(stocks));
+    window.location.href = "compare.html";
 }
