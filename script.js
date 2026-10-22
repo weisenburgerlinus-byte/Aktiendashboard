@@ -1,4 +1,5 @@
-   const stocks =[
+ 
+const stocks = [
     {
         symbol: "AAPL",
         name: "Apple Inc.",
@@ -16,104 +17,291 @@
             "1M": [218.0, 220.5, 222.1, 225.0, 228.4, 230.0, 232.4],
             "1Y": [170.5, 182.0, 195.4, 210.2, 220.0, 228.0, 232.4]
         }
+    },
+    {
+        symbol: "MSFT",
+        name: "Microsoft Corporation",
+        category: "tech",
+        price: 420.00,
+        change: "+0.80%",
+        positive: true,
+        mcap: "$3.1 T",
+        pe: "35.0",
+        high: "$468.35",
+        low: "$385.58",
+        history: {
+            "1D": [416, 418, 417, 419, 420, 420],
+            "1W": [410, 413, 412, 416, 418, 419, 420],
+            "1M": [395, 400, 403, 408, 512, 416, 420],
+            "1Y": [370, 380, 392, 400, 408, 415, 420]
+                }
+    },
+    {
+        symbol: "NVDA",
+        name: "NVIDIA Corporation",
+        category: "Tech",
+        price: 145.00,
+        change: "+2.10%",
+        positive: true,
+        mcap: "$3.5 T",
+        pe: "55.0",
+        high: "$153.00",
+        low: "$68.00",
+        history:  {
+            "1D": [141, 142, 140, 143, 144, 145],
+            "1W": [136, 138, 137, 140, 141, 143, 145],
+            "1M": [125, 129, 132, 136, 139, 142, 145],
+            "1Y": [80, 92, 105, 118, 130, 138, 145]
+        }
+    },
+    {
+        symbol: "AMZN",
+        name: "Amazon.com, Inc.",
+        category: "Tech",
+        price: 220.00,
+        change: "+o.45",
+        positive: true,
+        mcap: "$2.3 T",
+        pe: "40.0",
+        high: "$242.00",
+        low: "$161.00",
+        history: {
+            "1D": [218, 219, 218.5, 219, 219.5, 220],
+            "1W": [214, 215, 216, 217, 216.5, 219, 220],
+            "1M": [205, 208, 211, 214, 216, 218, 220],
+            "1Y": [165, 175, 185, 195, 205, 214, 220]
+        }
+    },
+    
 
+
+];
+
+
+let selectedStock = stocks[0];
+let selectedTimeframe = "1W";
+let selectedCategory = "All";
+let stockChart = null;
+
+
+
+function renderStocks() {
+    const grid = document.getElementById("stockGrid");
+    const searchInput = document.getElementById("searchInput");
+
+    if (!grid) return;
+
+    const searchTerm = searchInput
+        ? searchInput.value.trim().toLowerCase()
+        : "";
+
+    grid.innerHTML = "";
+
+    const filteredStocks = stocks.filter(stock => {
+        const matchesSearch =
+            stock.name.toLowerCase().includes(searchTerm) ||
+            stock.symbol.toLowerCase().includes(searchTerm);
+
+        const matchesCategory =
+            selectedCategory === "All" ||
+            stock.category.toLowerCase() === selectedCategory.toLowerCase();
+
+        return matchesSearch && matchesCategory;
+    });
+
+    if (filteredStocks.length === 0) {
+        grid.innerHTML = `
+            <p class="text-stone-400 col-span-full">
+            </p>
+        `;
+        return;
     }
 
-    ]
+    filteredStocks.forEach(stock => {
+        const isSelected = stock.symbol === selectedStock.symbol;
+        const card = document.createElement("div");
 
-    let selectedStock =stocks[0];
-    let selectedTimeframe = "1W";
-    let selectedCategory= "All";
-    let stockChart = null;
+        card.className = `
+            bg-stone-900 border
+            ${isSelected
+                ? "border-stone-500 shadow-stone-500/10"
+                : "border-stone-800 hover:border-stone-700"}
+            rounded-2xl p-5 cursor-pointer transition shadow-lg group
+        `;
 
-    function renderStocks() {
-        const grid = document.getElementById("stockGrid")
-        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
-        grid.innerHTML = "";
-        
-        const filteredStocks = stocks.filter(stock =>{
-            const matchesSearch = stock.name.toLowerCase().includes(searchTerm) || stock.symbol.toLowerCase().includes(searchTerm);
-            const matchesCategory =selectedCategory === "All" || stock.category === selectedCategory;
-            return matchesSearch && matchesCategory;
-        });
-
-        filteredStocks.forEach(stock => {
-            const isSelected = stock.symbol === selectedStock.symbol;
-            const card = document.createElement("div");
-            card.className = `bg-stone-900 border ${isSelected ? 'border-stone-500 shadow-stone-500/10' : 'border-stone-800 hover:border-stone-700'} rounded-2xl p-5 cursor-pointer transition shadow-lg relative group`;
-            card.onclick = () =>  selectStock(stock);
-
-            card.innerHTML =`
-                <div class="flex justify-between item-start mb-3">
-                    <div>
-                        <span class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-md font-mono">${stock.symbol}</span>
-                        <h3 class="font-bold text-stone-100  mt-2.5  group-hover:text-blue-400 transition">${stock.name}</h3>
-                    </div>
-                    <span class="text-xs font-medium text-stone-500">${stock.mcap}</span>
-                </div>
-                <div class="flex justify-between items-end mt-4">
-                    <span class="text-2xl font-black text-white">$${stock.price.toFixed(2)}</span>
-                    <span class="text-xs font-bold px-2 py-1 rounded-md ${stock.positive ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10'}">
-                        ${stock.change}
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <span class="text-xs font-bold text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded-md font-mono">
+                        ${stock.symbol}
                     </span>
+                    <h3 class="font-bold text-stone-100 mt-2.5 group-hover:text-blue-400 transition">
+                        ${stock.name}
+                    </h3>
                 </div>
-             `;
-             grid.appendChild(card);
-        });
-        }
-        function renderChart() {
-            const canvas = document.getElementById("stockChart");
-            if (!canvas) return;
+                <span class="text-xs font-medium text-stone-500">
+                    ${stock.mcap}
+                </span>
+            </div>
 
-            const ctx = canvas.getContext("2d");
-            const dataPoints =
-                selectedStock.history[selectedTimeframe] || selectedStock.history["1W"];
-                if (stockChart) {
-                    stockChart.destroy();
+            <div class="flex justify-between items-end mt-4">
+                <span class="text-2xl font-black text-white">
+                    $${stock.price.toFixed(2)}
+                </span>
+                <span class="text-xs font-bold px-2 py-1 rounded-md ${
+                    stock.positive
+                        ? "text-emerald-400 bg-emerald-500/10"
+                        : "text-rose-400 bg-rose-500/10"
+                }">
+                    ${stock.change}
+                </span>
+            </div>
+        `;
+
+        card.addEventListener("click", () => selectStock(stock));
+        grid.appendChild(card);
+    });
+}
+
+
+function updateDetails() {
+    document.getElementById("chartTitle").textContent = selectedStock.name;
+    document.getElementById("chartTicker").textContent = selectedStock.symbol;
+    document.getElementById("chartCategory").textContent = selectedStock.category;
+    document.getElementById("chartPrice").textContent =
+        "$" + selectedStock.price.toFixed(2);
+
+    const changeElement = document.getElementById("chartChange");
+    changeElement.textContent = selectedStock.change;
+    changeElement.className = `
+        text-sm font-semibold px-2.5 py-1 rounded-lg
+        ${selectedStock.positive
+            ? "text-emerald-400 bg-emerald-500/10"
+            : "text-rose-400 bg-rose-500/10"}
+    `;
+
+    document.getElementById("mcapVal").textContent = selectedStock.mcap;
+    document.getElementById("peVal").textContent = selectedStock.pe;
+    document.getElementById("highVal").textContent = selectedStock.high;
+    document.getElementById("lowVal").textContent = selectedStock.low;
+}
+
+
+
+function renderChart() {
+    const canvas = document.getElementById("stockChart");
+
+    if (!canvas) return;
+
+    if (typeof Chart === "undefined") {
+        console.error;
+        return;
+    }
+
+    const dataPoints =
+        selectedStock.history[selectedTimeframe] ||
+        selectedStock.history["1W"];
+
+    if (stockChart) {
+        stockChart.destroy();
+    }
+
+    const lineColor = selectedStock.positive ? "#34d399" : "#f87171";
+    const fillColor = selectedStock.positive
+        ? "rgba(52, 211, 153, 0.12)"
+        : "rgba(248, 113, 113, 0.12)";
+
+    stockChart = new Chart(canvas.getContext("2d"), {
+        type: "line",
+        data: {
+            labels: dataPoints.map((_, index) => index + 1),
+            datasets: [{
+                label: selectedStock.symbol,
+                data: dataPoints,
+                borderColor: lineColor,
+                backgroundColor: fillColor,
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    ticks: { color: "#a8a29e" },
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: { color: "#a8a29e" },
+                    grid: { color: "rgba(120, 113, 108, 0.2)" }
                 }
-                stockChart =  new Chat(ctx, {
-                    type: "line",
-                    data: {
-                        labels: dataPoints.map((_, index) => index + 1),
-                        datasets: [{
-                            label: selectedStock.symbol,
-                            data:  dataPoints,
-                            borderColor: selectedStock.positive ?  "#34d399" : "#f87171",
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend:  { display: false } }
-                    }
-                });
+            }
         }
-       function updateDetails() {
-        document.getElementById("chartTitle").innerText = selectedStock.name;
-        document.getElementById("chartTicker").innerText = selectedStock.symbol;
-        document.getElementById("chartCategory").innerText = selectedStock.category;
-        document.getElementById("chartPrice").innerText = "$" + selectedStock.price.toFixed(2);
+    });
+}
 
-        const changeEl =  document.getElementById("chartChange");
-        changeEl.innerText =  selectedStock.change;
 
-        if (selectedStock.positive) {
-            changeEl.className = "text-sm font-semibold px-2.5 py-1 rounded-lg text-emerald-400 bg-emerald-500/10"
-        } else {
-            changeEl.className = "text.sm font-semibold px-2.5 py-1 rounded-lg text-rose-400 bg-rose-500/10";
-        }
+function selectStock(stock) {
+    selectedStock = stock;
+    updateDetails();
+    renderChart();
+    renderStocks();
+}
 
-        document.getElementById("mcapVal").innerText = selectedStock.mcap;
-        document.getElementById("peVal").innerText = selectedStock.pe;
-        document.getElementById("highVal").innerText = selectedStock.high;
-        document.getElementById("lowVal").innerText = selectedStock.low;
 
-        renderStocks();
-        
+function setTimeframe(timeframe) {
+    selectedTimeframe = timeframe;
 
-       } 
+    document.querySelectorAll(".tf-btn").forEach(button => {
+        const isActive =
+            button.getAttribute("onclick") === `setTimeframe('${timeframe}')`;
 
- 
+        button.classList.toggle("active-tf", isActive);
+        button.classList.toggle("bg-stone-800", isActive);
+        button.classList.toggle("text-white", isActive);
+        button.classList.toggle("text-stone-400", !isActive);
+    });
+
+    renderChart();
+}
+
+function filterCategory(category) {
+    selectedCategory = category;
+
+    document.querySelectorAll(".cat-btn").forEach(button => {
+        const isActive =
+            button.getAttribute("onclick") === `filterCategory('${category}')`;
+
+        button.classList.toggle("active-cat", isActive);
+        button.classList.toggle("bg-gray-600", isActive);
+        button.classList.toggle("text-white", isActive);
+        button.classList.toggle("bg-stone-900", !isActive);
+        button.classList.toggle("text-stone-400", !isActive);
+    });
+
+    renderStocks();
+}
+
+
+function initDashboard() {
+    const searchInput = document.getElementById("searchInput");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", renderStocks);
+    }
+
+    renderStocks();
+    updateDetails();
+    renderChart();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initDashboard);
+} else {
+    initDashboard();
+}
