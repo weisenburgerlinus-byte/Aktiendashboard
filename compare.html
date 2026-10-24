@@ -39,10 +39,10 @@
 >
                         <span class="block text-sm text-stone-400">Timeframe</span>
                         <select id="timeframe" class="w-full bg-stone-950 border border-stone-700 rounded-lg p-3">
-                            <option value="1D"></option>
-                            <option value="1W" selected></option>
-                            <option value="1M"></option>
-                            <option value="1Y"></option>
+                            <option value="1D">1 Day</option>
+                            <option value="1W" selected>1 Week</option>
+                            <option value="1M">1 Month</option>
+                            <option value="1Y">1 Year</option>
                         </select>
                     </label>                
                 </div>
@@ -56,11 +56,29 @@
                   The lines show the percentage-based trend starting from the initial point.
                   (Example Data)
                 </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-stone-950 border border-blue-500/40 rounded-xl p-4">
+                        <p id="summaryStockAName" class="text-sm text-blue-400">Blue Line</p>
+                        <p id="summaryStockAReturn" class="text-2xl font-bold mt-2">>--</p>
+                    </div>
+
+                    <div class="bg-stone-950 border border-orange-500/40 rounded-xl p-4">
+                        <p id="summaryStockBName" class="text-sm text-orange-400">Orange Line</p>
+                        <p id="summaryStockBReturn" class="text-2xl font-bold mt-2">--</p>
+                    </div>
+
+                    <div class="bg-stone-950 border border-stone-800 rounded-xl p-4">
+                        <p class="text-sm text-stone-400">Best in selected period</p>
+                        <p id="summaryWinner" class="text-2xl font-bold mt-2">--</p>
+                        <p id="summaryDifference" class="text-xs text-stone-400 mt-1">--</p>
+                    </div>
+                </div>
             </section>
         </main>
 
         <script>
-            const savedStocks = localStorages.getItem("stocksForComparison");
+            const savedStocks = localStorage.getItem("stocksForComparison");
             const stocks = savedStocks ? JSON.parse(savedStocks) : [];
 
             const stockASelect = document.getElementById("stockA");
@@ -97,15 +115,119 @@
 
                 const normalizedA = valuesA.slice(0, pointCount).map(value => (value / valuesA[0]) * 100);
                 const normalizedB = valuesB.slice(0, pointCount).map(value => (value / valuesB[0]) * 100);
+
+                const returnA = normalizedA[normalizedA.length - 1] - 100;
+                const returnB = normalizedB[normalizedB.length - 1] - 100;
+
+                function formatPercent(value) {
+                    const sign =  value >= 0 ? "+" : "";
+                    return `${sign}${value.toFixed(2)}%`;
+                }
+                document.getElementById("summaryStockAName").textContent = 
+                    `${stockA.name} (${stockA.symbol})`;
+                document.getElementById("summaryStockAReturn").textContent = 
+                    formatPercent(returnA);
+
+                document.getElementById("summaryStockBName").textContent = 
+                    `${stockB.name} (${stockB.symbol})`;
+                document.getElementById("summaryStockBReturn").textContent = 
+                    formatPercent(returnB);
+
+                    const winnerElement = document.getElementById("summaryWinner");
+                    const differenceElement = document.getElementById("summaryDifference");
+                    const difference = Math.abs(returnA - returnB);
+
+                    if (difference < 0.01) {
+                        winnerElement.textContent = "Tie";
+                        differenceElement.textContent = "Both stocks performed equally";
+                    } else {
+                        const winner = returnA > returnB ? stockA : stockB;
+                        winnerElement.textContent = winner.symbol;
+                        differenceElement.textContent = 
+                        `Ahead by ${difference.toFixed(2)} percentage points`;
+                    }
+
                 const labels =Array.from({ length: pointCount },(_, index) => `Point ${index + 1}`);
 
                 if (comparisonChart) {
                     comparisonChart.destroy();
                 }
+                comparisonChart = new Chart(document.getElementById("comparisonChart").getContext("2d"),
+                {
+                    type: "line",
+                    data: {
+                        labels,
+                        datasets: [
+                            {
+                                label: stockA.symbol,
+                                data: normalizedA,
+                                borderColor: "#60a5fa",
+                                backgroundColor: "#60a5fa",
+                                borderWidth: 2,
+                                tension: 0.3
+                            },
+                            {
+                                label: stockB.symbol,
+                                data: normalizedB,
+                                borderColor:  "#fb923c",
+                                backgroundColor: "#fb923c",
+                                borderWidth: 2,
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: "index",
+                            intersect: false
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const change = context.parsed.y - 100;
+                                        const sign = change >= 0 ? "+" : "";
+                                        return `${context.dataset.label}:${sign}${change.toFixed(2)}%`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x:  {
+                                ticks:  { color: "#a8a29e" },
+                                grid: { display: false }
+                            },
+                            y: {
+                                ticks:  {
+                                    color: "#a8a29e",
+                                    callback: value => `${(value - 100).toFixed(0)}%`
+                                },
+                                title:  {
+                                    display: true,
+                                    text: "change since the start",
+                                    color: "#a8a29e"
+                                },
+                                grid: { color: "rgba(120, 113, 108, 0.2)"}
+                            }
+                        }
+                    }
+                }
+            );        
+        }
 
-                
-            }
+        if (stocks.length < 2) {
+            message.textContent = 
+            "No stocks found. First, open the dashboard and click on “Compare stocks” there.";
+        } else {
+            addStockOptions();
+            renderComparison();
 
+            stockASelect.addEventListener("change", renderComparison);
+            stockBSelect.addEventListener("change", renderComparison);
+            timeframeSelect.addEventListener("change", renderComparison);
+        }
         </script>
     </body>
 </html>
