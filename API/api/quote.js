@@ -28,19 +28,20 @@ module.exports  = async function handler(req, res) {
                     const url = 'https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${key}';
                     const result = await fetch(url);
 
-                    
-                })
-                
-            
-                
-            )
-        }
-        catch (Error) {
-            console.error(error.message);
-            return res.status(502).json({ error: "FINNHUB not available"})
-        }
-        finally {
+                    if (answer.status === 429) return {symbol, error: "Limit reached, please wait a moment"};
+                    if (!answer.ok) return { symbol, error: "error"  + answer.status};
 
-        }
-    }
+                    const d = await answer.json();
+                    if (!d.c) return {symbol, error: "not found"};
+                    return { symbol, price: d.c, change: d.d, percent: d,dp};
+                })  
+            );
+
+            res.setHeader("Cache-Control", "s-maxage=30, stale-while-revalidate=60");
+            return res.status(200).json(results);
+        } catch (Error) {
+          console.error(error.message);
+          return res.status(502).json({ error: "FINNHUB not available"});
+        } 
+    };
 }

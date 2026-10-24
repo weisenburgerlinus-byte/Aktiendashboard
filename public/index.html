@@ -158,6 +158,37 @@
     </section>
 </main>
 
-<script src="script.js"></script>
+<script src="script.js">
+    const symbols = ["AAPL", "MSFT", "TSLA",];
+
+    async function showAll() {
+        const list = document.getElementById("list");
+        const status = document.getElementById("status");
+        list.innerHTML ="";
+        status.textContent = " load courses ...";
+
+        try {
+            const answer = await fetch("/api/quote?symbols" + encodeURIComponent(symbols.join(",")));
+            if (!answer.ok) throw new Error("Server Error"  + answer.status);
+            const courses = await answer.json();
+
+            for (const c of courses) {
+                const li = document.createElement("li");
+                if (c.error) {
+                    li.textContent = `${c.symbol}: ${c.error}`;
+                } else {
+                    const plus = c.change >= 0;
+                    li.textContent  = `${c.symbol}: ${c.price.toFixed(2)} USD (${plus ? "+" : ""}${c.percent.toFixed(2)} %)`;
+                    li.style.color = plus ? "green" : "red";
+                }
+                list.appendChild(li);
+            }
+            status.textContent = "stand: " + new date().toLocaleTimeString("en-EN");
+        } catch (error) {
+            status.textContent = "Error while loading:  " + error.message;
+        }
+    }
+    showAll();
+    </script>
 </body>
 </html>
