@@ -59,7 +59,7 @@ const stocks = [
         name: "Amazon.com, Inc.",
         category: "Tech",
         price: 220.00,
-        change: "+o.45",
+        change: "+0.45",
         positive: true,
         mcap: "$2.3 T",
         pe: "40.0",
